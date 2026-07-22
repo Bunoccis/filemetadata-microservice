@@ -5,14 +5,17 @@ require('dotenv').config();
 
 var app = express();
 
-// Configuración CORS total para que FCC no bloquee la lectura del JSON
-app.use(cors());
+// Configuración de CORS Total para peticiones Cross-Origin de FreeCodeCamp
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/public', express.static(process.cwd() + '/public'));
 
-// Multer configurado con memoryStorage
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
@@ -20,21 +23,17 @@ app.get('/', function (req, res) {
   res.sendFile(process.cwd() + '/views/index.html');
 });
 
-// Endpoint /api/fileanalyse
+// Endpoint
 app.post('/api/fileanalyse', upload.single('upfile'), function (req, res) {
-  // Si por alguna razón no llega el archivo, logueamos para debuggear
   if (!req.file) {
-    console.log("No file uploaded in req.file");
     return res.status(400).json({ error: 'Please upload a file' });
   }
 
-  console.log("File received successfully:", req.file.originalname);
-
-  // Respuesta con nombres y tipos estrictos
+  // Objeto exacto esperado por FCC
   res.json({
-    name: String(req.file.originalname),
-    type: String(req.file.mimetype),
-    size: Number(req.file.size)
+    name: req.file.originalname,
+    type: req.file.mimetype,
+    size: req.file.size
   });
 });
 
