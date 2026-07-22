@@ -31,13 +31,15 @@ app.post('/api/fileanalyse', upload.single('upfile'), function (req, res) {
     return res.status(400).json({ error: 'Please upload a file' });
   }
 
-  // Respuesta exacta que exige la prueba 4: { name: "...", type: "...", size: 1234 }
-  return res.json({
-    name: req.file.originalname,
-    type: req.file.mimetype,
-    size: Number(req.file.size)
+  // Devolvemos el JSON asegurando que ningún campo sea undefined o vacío
+  res.json({
+    name: req.file.originalname || 'file',
+    type: req.file.mimetype || 'text/plain',
+    size: Number(req.file.size) || 0
   });
 });
+
+  // Respuesta exacta que exige la prueba 4: { name: "...", type: "...", size: 1234 }
 
 const port = process.env.PORT || 3000;
 app.listen(port, function () {
