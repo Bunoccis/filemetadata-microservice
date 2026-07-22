@@ -1,28 +1,31 @@
 var express = require('express');
 var cors = require('cors');
-require('dotenv').config();
 var multer = require('multer');
-
-// Configurar multer para almacenar en memoria
-var storage = multer.memoryStorage();
-var upload = multer({ storage: storage });
+require('dotenv').config();
 
 var app = express();
 
-app.use(cors());
+// Enable CORS for FreeCodeCamp tests
+app.use(cors({ optionsSuccessStatus: 200 }));
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use('/public', express.static(process.cwd() + '/public'));
+
+// Memory storage configuration
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 app.get('/', function (req, res) {
   res.sendFile(process.cwd() + '/views/index.html');
 });
 
-// Ruta corregida para la prueba 4
+// Endpoint principal
 app.post('/api/fileanalyse', upload.single('upfile'), function (req, res) {
   if (!req.file) {
-    return res.status(400).json({ error: 'No file uploaded' });
+    return res.status(400).json({ error: 'Please upload a file' });
   }
 
-  // Devolver exactamente la estructura que espera FreeCodeCamp
   res.json({
     name: req.file.originalname,
     type: req.file.mimetype,
