@@ -1,10 +1,11 @@
 var express = require('express');
 var cors = require('cors');
 require('dotenv').config();
-
-// 1. Requerir multer y configurar almacenamiento en memoria
 var multer = require('multer');
-var upload = multer({ storage: multer.memoryStorage() });
+
+// Configurar multer para almacenar en memoria
+var storage = multer.memoryStorage();
+var upload = multer({ storage: storage });
 
 var app = express();
 
@@ -15,14 +16,13 @@ app.get('/', function (req, res) {
   res.sendFile(process.cwd() + '/views/index.html');
 });
 
-// 2. Endpoint POST /api/fileanalyse
-// Note: 'upfile' es el nombre exacto del input en el HTML de FreeCodeCamp
+// Ruta corregida para la prueba 4
 app.post('/api/fileanalyse', upload.single('upfile'), function (req, res) {
   if (!req.file) {
-    return res.json({ error: 'Please upload a file' });
+    return res.status(400).json({ error: 'No file uploaded' });
   }
 
-  // Responder con los metadatos requeridos por FCC
+  // Devolver exactamente la estructura que espera FreeCodeCamp
   res.json({
     name: req.file.originalname,
     type: req.file.mimetype,
