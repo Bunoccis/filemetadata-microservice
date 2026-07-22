@@ -1,47 +1,42 @@
-const express = require('express');
-const cors = require('cors');
-const multer = require('multer');
+var express = require('express');
+var cors = require('cors');
+var multer = require('multer');
 require('dotenv').config();
 
-const app = express();
+var app = express();
 
-// Middleware CORS obligatorio para permitir que FCC inspeccione las respuestas
+// Permite peticiones CORS de cualquier origen
 app.use(cors());
 
-// Middleware de procesado de datos en Express
+// Parseadores de cuerpo
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Archivos estáticos
 app.use('/public', express.static(process.cwd() + '/public'));
 
-// Configuración de Multer usando memoria RAM temporal
+// Configuración de multer en memoria
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-// Servir la página HTML principal
 app.get('/', function (req, res) {
   res.sendFile(process.cwd() + '/views/index.html');
 });
 
-// Endpoint exigido por el desafío: POST /api/fileanalyse
-// El parámetro 'upfile' debe coincidir EXACTAMENTE con el atributo name del input en el HTML
+// Endpoint POST
 app.post('/api/fileanalyse', upload.single('upfile'), function (req, res) {
   if (!req.file) {
-    return res.status(400).json({ error: 'Please upload a file' });
+    return res.status(400).json({ error: 'No file uploaded' });
   }
 
-  // Devolvemos el JSON asegurando que ningún campo sea undefined o vacío
+  // Estructura limpia y estricta que exige FreeCodeCamp
   res.json({
-    name: req.file.originalname || 'file',
+    name: req.file.originalname,
     type: req.file.mimetype || 'text/plain',
-    size: Number(req.file.size) || 0
+    size: Number(req.file.size)
   });
 });
 
-  // Respuesta exacta que exige la prueba 4: { name: "...", type: "...", size: 1234 }
-
 const port = process.env.PORT || 3000;
 app.listen(port, function () {
-  console.log('App escuchando en puerto ' + port);
+  console.log('Your app is listening on port ' + port);
 });
