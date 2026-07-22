@@ -1,51 +1,45 @@
-var express = require('express');
-var cors = require('cors');
-var multer = require('multer');
+const express = require('express');
+const cors = require('cors');
+const multer = require('multer');
 require('dotenv').config();
 
-var app = express();
+const app = express();
 
-// Middleware para Forzar 'No-Cache' en cada petición
-app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.header("Cache-Control", "no-cache, no-store, must-revalidate");
-  res.header("Pragma", "no-cache");
-  res.header("Expires", "0");
-  
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-  next();
-});
+// Middleware CORS obligatorio para permitir que FCC inspeccione las respuestas
+app.use(cors());
 
+// Middleware de procesado de datos en Express
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Archivos estáticos
 app.use('/public', express.static(process.cwd() + '/public'));
 
+// Configuración de Multer usando memoria RAM temporal
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
+// Servir la página HTML principal
 app.get('/', function (req, res) {
   res.sendFile(process.cwd() + '/views/index.html');
 });
 
-// Endpoint principal
+// Endpoint exigido por el desafío: POST /api/fileanalyse
+// El parámetro 'upfile' debe coincidir EXACTAMENTE con el atributo name del input en el HTML
 app.post('/api/fileanalyse', upload.single('upfile'), function (req, res) {
   if (!req.file) {
     return res.status(400).json({ error: 'Please upload a file' });
   }
 
-  // Enviamos la respuesta exactamente como la pide FCC
-  res.json({
+  // Respuesta exacta que exige la prueba 4: { name: "...", type: "...", size: 1234 }
+  return res.json({
     name: req.file.originalname,
     type: req.file.mimetype,
-    size: req.file.size
+    size: Number(req.file.size)
   });
 });
 
 const port = process.env.PORT || 3000;
 app.listen(port, function () {
-  console.log('Your app is listening on port ' + port);
+  console.log('App escuchando en puerto ' + port);
 });
